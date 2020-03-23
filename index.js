@@ -1,17 +1,23 @@
 // エントリーポイント
-function main() {
-  fetchUserInfo('cobachie')
-    .then((userInfo) => createView(userInfo))
-    .then((view) => displayView(view))
-    .catch((error) => {
-      console.error("エラーが発生しました（${error}）");
-    });
+async function main() {
+  try {
+    const userId = getUserId();
+    const userInfo = await fetchUserInfo(userId);
+    const view = createView(userInfo);
+    displayView(view);
+  } catch (error) {
+    console.error(`エラーが発生しました（${error}）`);
+  }
+}
+
+function getUserId() {
+  const value = document.getElementById("userId").value;
+  return encodeURIComponent(value);
 }
 
 function fetchUserInfo(userId) {
   fetch(`https://api.github.com/users/${encodeURIComponent(userId)}`)
     .then(response => {
-      console.log(response.status);
       if (!response.ok) {
         return Promise.reject(new Error(`${response.status}: ${response.statusText}`));
       } else {
@@ -21,7 +27,6 @@ function fetchUserInfo(userId) {
 }
 
 function createView(userInfo) {
-  console.log(userInfo);
   return escapeHTML`
           <h4>${userInfo.name} (@${userInfo.login})</h4>
           <img src="${userInfo.avatar_url}" alt="${userInfo.login}" height="100">
